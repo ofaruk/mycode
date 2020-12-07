@@ -1,0 +1,6 @@
+google-api-python-client
+google-cloud-core
+google-api-core
+google-cloud-bigquery
+google-cloud-storage>=1.22.0
+pandas-gbq==0.7.0

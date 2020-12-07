@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Vehicle_ID",
+    "type": "INTEGER",
+    "description": ""
+  },
+  {
+    "name": "Option_Quantities",
+    "type": "NUMERIC",
+    "description": ""
+  },
+  {
+    "name": "Options_Code",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "Option_Desc",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "Model_Text",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "Sales_Price",
+    "type": "NUMERIC",
+    "description": ""
+  },
+  {
+    "name": "Production_Cost",
+    "type": "NUMERIC",
+    "description": "Calculated cost using the given logic"
+  },
+  {
+    "name": "Profit",
+    "type": "NUMERIC",
+    "description": "Profit = Sales_Price - Cost"
+  }
+]

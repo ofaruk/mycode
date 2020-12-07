@@ -1,0 +1,22 @@
+[
+  {
+    "name": "Model",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "Option_Code",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "Option_Desc",
+    "type": "STRING",
+    "description": ""
+  },
+  {
+    "name": "Material_Cost",
+    "type": "NUMERIC",
+    "description": ""
+  }
+]

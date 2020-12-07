@@ -1,0 +1,24 @@
+{
+  "bq_base_table_name": "airflow_jlr.base_table",
+  "bq_options_table_name": "airflow_jlr.options_table",
+  "gcs_bucket_name": "jlr-test-files",
+  "csv_base_dataset": "Base_dataset.csv",
+  "csv_options_dataset": "Options_dataset.csv",
+  "bq_base_table_schema":[
+            {"name": "Vehicle_ID", "type": "INTEGER", "mode": "NULLABLE"},
+            {"name": "Option_Quantities", "type": "INTEGER", "mode": "NULLABLE"},
+            {"name": "Options_Code", "type": "STRING", "mode": "NULLABLE"},
+            {"name": "Option_Desc", "type": "STRING", "mode": "NULLABLE"},
+            {"name": "Model_Text", "type": "STRING", "mode": "NULLABLE"},
+            {"name": "Sales_Price", "type": "NUMERIC", "mode": "NULLABLE"}
+        ],
+  "bq_options_table_schema": [
+            {"name": "Model", "type": "STRING", "mode": "NULLABLE"},
+            {"name": "Option_Code", "type": "STRING", "mode": "NULLABLE"},
+            {"name": "Option_Desc", "type": "STRING", "mode": "NULLABLE"},
+            {"name": "Material_Cost", "type": "NUMERIC", "mode": "NULLABLE"}
+            ],
+  "query": "Create or replace View airflow_jlr.vw_option_profit AS\n    SELECT\n        b.Vehicle_ID,\n        b.Option_Quantities,\n        b.Options_Code,\n        b.Option_Desc,\n        b.Model_Text,\n        b.Sales_Price,\n        COALESCE(ZeroCost, Material_Cost, av.Average_Cost, Sales_Price*0.45) as Production_Cost,\n        --below depends on business decision e.g. if no profit is expected from options costing zero; negative or positive, then profit is assumed 0\n        CASE\n          WHEN ZeroCost = 0 THEN 0\n          ELSE Sales_Price - COALESCE(ZeroCost, Material_Cost, av.Average_Cost, Sales_Price*0.45)\n        END  as Profit\n    FROM\n    (\n        SELECT\n            Vehicle_ID,\n            Option_Quantities,\n            Options_Code,\n            Option_Desc,\n            Model_Text,\n            CONCAT(SPLIT(Model_Text, ' ')[OFFSET(0)], \"_\", Options_Code) AS ModelOptionKey,\n            Sales_Price,\n            CASE\n                WHEN Sales_Price <= 0 THEN 0\n                ELSE null\n            END AS ZeroCost\n        FROM airflow_jlr.base_table\n    ) b\n    -- left join the average cost due to multiple occurrence of material cost for modeloptionkey in options table\n    LEFT JOIN\n    (\n        SELECT Concat(Model, \"_\", Option_Code) as ModelOptionKey, AVG(Material_Cost) as Material_Cost FROM  airflow_jlr.options_table Group by 1\n    ) o on b.ModelOptionKey = o.ModelOptionKey\n    LEFT JOIN\n    (\n        SELECT Option_Code, AVG(Material_Cost) as Average_Cost FROM airflow_jlr.options_table GROUP BY Option_Code\n    ) av on b.Options_Code = av.Option_Code",
+  "query_path": "resources\\bq\\transform\\transform_and_create_view.sql"
+}
+
