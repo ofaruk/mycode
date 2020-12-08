@@ -26,7 +26,7 @@ with models.DAG(
         default_args=default_dag_args) as dag:
     load_base_csv = gcs_to_bq.GoogleCloudStorageToBigQueryOperator(
         task_id='load_base',
-        bucket='jlr-test-files',
+        bucket='jlr-test-files2',
         source_objects=['Base_dataset.csv'],
         destination_project_dataset_table='airflow_jlr.base_table',  # bq_base_table_name,
         skip_leading_rows=1,
@@ -37,7 +37,7 @@ with models.DAG(
 
     load_options_csv = gcs_to_bq.GoogleCloudStorageToBigQueryOperator(
         task_id='load_options',
-        bucket='jlr-test-files',
+        bucket='jlr-test-files2',
         source_objects=['Options_dataset.csv'],
         destination_project_dataset_table='airflow_jlr.options_table',
         skip_leading_rows=1,
@@ -53,7 +53,7 @@ with models.DAG(
         SELECT
             b.Vehicle_ID,
             b.Option_Quantities,
-            b.Options_Code,
+            b.Option_Code,
             b.Option_Desc,
             b.Model_Text,
             b.Sales_Price,
@@ -68,38 +68,29 @@ with models.DAG(
             SELECT
                 Vehicle_ID,
                 Option_Quantities,
-                Options_Code,
+                Option_Code,
                 Option_Desc,
                 Model_Text,
-                CONCAT(SPLIT(Model_Text, ' ')[OFFSET(0)], "_", Options_Code) AS ModelOptionKey,
+                CONCAT(SPLIT(Model_Text, ' ')[OFFSET(0)], "_", Option_Code) AS ModelOptionKey,
                 Sales_Price,
                 CASE
                     WHEN Sales_Price <= 0 THEN 0
                     ELSE null
                 END AS ZeroCost
-            FROM base_dataset.base_table
+            FROM airflow_jlr.base_table
         ) b
-        -- left join the average cost due to multiple occurance of material cost for modeloptionkey in options table
+        -- left join the average cost due to multiple occurrence of material cost for modeloptionkey in options table
         LEFT JOIN 
         (
             SELECT Concat(Model, "_", Option_Code) as ModelOptionKey, AVG(Material_Cost) as Material_Cost 
-            FROM  options_dataset.options_table Group by 1
+            FROM  airflow_jlr.options_table Group by 1
         ) o on b.ModelOptionKey = o.ModelOptionKey
         LEFT JOIN
         (
-            SELECT Option_Code, AVG(Material_Cost) as Average_Cost FROM options_dataset.options_table 
+            SELECT Option_Code, AVG(Material_Cost) as Average_Cost FROM airflow_jlr.options_table 
             GROUP BY Option_Code
-        ) av on b.Options_Code = av.Option_Code
+        ) av on b.Option_Code = av.Option_Code
         """,
-        use_legacy_sql=False,
-    )
-
-    bq_delete_tables = bigquery_operator.BigQueryOperator(
-        task_id='clean_up',
-        bql="""
-            drop table airflow_jlr.base_table;
-            drop table airflow_jlr.options_table
-            """,
         use_legacy_sql=False,
     )
 
@@ -107,4 +98,4 @@ with models.DAG(
         trigger_rule='one_success',
         task_id='end')
 
-    load_base_csv, load_options_csv >> bq_calculate_profit >> bq_delete_tables >> end
+    [load_base_csv, load_options_csv] >> bq_calculate_profit >> end
