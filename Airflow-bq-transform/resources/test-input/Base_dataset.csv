@@ -1,0 +1,14 @@
+Vehicle ID,Option_Quantities,Option_Code,Option_Desc,Model_Text,Sales_Price
+1,1,XYZ,XYZ,L405 Range Rover,300
+2,1,XYZ,XYZ,L505 Land Rover,450
+3,1,XYZ,XYZ,L538 Range Rover Evoque,230
+4,3,ABC,ABC,L405 Range Rover,100
+5,1,ABC,ABC,L505 Land Rover,0
+6,2,ABC,ABC,L505 Land Rover,0
+7,1,ABC,ABC,L538 Range Rover Evoque,0
+8,-1,POC,POC,L405 Range Rover,-230
+9,-1,POC,POC,L505 Land Rover,-450
+10,-1,POC,POC,L538 Range Rover Evoque,-100
+11,-1,KOLKDF,KOLKDF,L405 Range Rover,-210
+12,1,KOLKDF,KOLKDF,L505 Land Rover,1000
+13,4,KOLKDF,KOLKDF,L538 Range Rover Evoque,50
