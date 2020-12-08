@@ -57,11 +57,11 @@ with models.DAG(
             b.Option_Desc,
             b.Model_Text,
             b.Sales_Price,
-            COALESCE(ZeroCost, Material_Cost, av.Average_Cost, Sales_Price*0.45) as Production_Cost,
+            COALESCE(ZeroCost, b.Option_Quantities*Material_Cost, b.Option_Quantities*av.Average_Cost, Sales_Price*0.45) as Production_Cost,
             --below depends on business decision e.g. if no profit is expected from options costing zero; negative or positive, then profit is assumed 0
             CASE  
               WHEN ZeroCost = 0 THEN 0
-              ELSE Sales_Price - COALESCE(ZeroCost, Material_Cost, av.Average_Cost, Sales_Price*0.45)
+              ELSE Sales_Price - COALESCE(ZeroCost, b.Option_Quantities*Material_Cost, b.Option_Quantities*av.Average_Cost, Sales_Price*0.45)
             END  as Profit
         FROM
         (
@@ -77,18 +77,29 @@ with models.DAG(
                     WHEN Sales_Price <= 0 THEN 0
                     ELSE null
                 END AS ZeroCost
-            FROM airflow_jlr.base_table
+            FROM base_dataset.base_table
         ) b
         -- left join the average cost due to multiple occurance of material cost for modeloptionkey in options table
         LEFT JOIN 
         (
-            SELECT Concat(Model, "_", Option_Code) as ModelOptionKey, AVG(Material_Cost) as Material_Cost FROM  airflow_jlr.options_table Group by 1
+            SELECT Concat(Model, "_", Option_Code) as ModelOptionKey, AVG(Material_Cost) as Material_Cost 
+            FROM  options_dataset.options_table Group by 1
         ) o on b.ModelOptionKey = o.ModelOptionKey
         LEFT JOIN
         (
-            SELECT Option_Code, AVG(Material_Cost) as Average_Cost FROM airflow_jlr.options_table GROUP BY Option_Code
+            SELECT Option_Code, AVG(Material_Cost) as Average_Cost FROM options_dataset.options_table 
+            GROUP BY Option_Code
         ) av on b.Options_Code = av.Option_Code
         """,
+        use_legacy_sql=False,
+    )
+
+    bq_delete_tables = bigquery_operator.BigQueryOperator(
+        task_id='clean_up',
+        bql="""
+            drop table airflow_jlr.base_table;
+            drop table airflow_jlr.options_table
+            """,
         use_legacy_sql=False,
     )
 
@@ -96,4 +107,4 @@ with models.DAG(
         trigger_rule='one_success',
         task_id='end')
 
-    load_base_csv, load_options_csv >> bq_calculate_profit >> end
+    load_base_csv, load_options_csv >> bq_calculate_profit >> bq_delete_tables >> end
