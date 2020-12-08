@@ -44,7 +44,7 @@ this solution was built for.
 | Option_Code | STRING |
 | Option_Desc | STRING |
 | Model_Text | STRING |
-| Sales_Price | INTEGER |
+| Sales_Price | NUMERIC |
 
 * A csv file with _Options_dataset.csv_ file name and below schema:
 
