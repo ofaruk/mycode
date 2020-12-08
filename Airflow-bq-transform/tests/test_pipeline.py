@@ -1,13 +1,11 @@
 from airflow.models import DagBag
-from airflow import Dag
 import unittest
 
 
 file = "../dags/pipeline.py"
 
 
-
-class testPipelineDag(unittest.TestCase):
+class TestPipelineDag(unittest.TestCase):
 
     def setUp(self):
         self.dagbag = DagBag(dag_folder=file, include_examples=False)
@@ -35,5 +33,5 @@ class testPipelineDag(unittest.TestCase):
         self.assertEqual(len(dag.tasks), 4)
 
 
-suite = unittest.TestLoader().loadTestsFromTestCase(testPipelineDag)
+suite = unittest.TestLoader().loadTestsFromTestCase(TestPipelineDag)
 unittest.TextTestRunner(verbosity=2).run(suite)
