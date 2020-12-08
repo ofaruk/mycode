@@ -37,19 +37,24 @@ this solution was built for.
 ### Inputs
 * A csv file with _Base_dataset.csv_ file name and below schema:
 
-`{"name": "Vehicle_ID", "type": "INTEGER", "mode": "NULLABLE"},
-{"name": "Option_Quantities", "type": "INTEGER", "mode": "NULLABLE"},
-{"name": "Options_Code", "type": "STRING", "mode": "NULLABLE"},
-{"name": "Option_Desc", "type": "STRING", "mode": "NULLABLE"},
-{"name": "Model_Text", "type": "STRING", "mode": "NULLABLE"},
-{"name": "Sales_Price", "type": "NUMERIC", "mode": "NULLABLE"}`
+| Field Name | Type |
+|------------|------| 
+| Vehicle_ID | INTEGER |	
+| Option_Quantities	| INTEGER | 	
+| Option_Code | STRING |
+| Option_Desc | STRING |
+| Model_Text | STRING |
+| Sales_Price | INTEGER |
 
 * A csv file with _Options_dataset.csv_ file name and below schema:
 
-`{"name": "Model", "type": "STRING", "mode": "NULLABLE"},
-{"name": "Option_Code", "type": "STRING", "mode": "NULLABLE"},
-{"name": "Option_Desc", "type": "STRING", "mode": "NULLABLE"},
-{"name": "Material_Cost", "type": "NUMERIC", "mode": "NULLABLE"}`
+| Field Name | Type |
+|------------|------| 
+| Model | STRING |	
+| Option_Code	| STRING | 	
+| Option_Desc | STRING |
+| Material_Cost | NUMERIC |
+
 
 #### Location for inputs
 Place two csv files in a bucket called _jlr-test-files_
